@@ -1420,6 +1420,7 @@ printf("=> %s %s %p\n", pool_id2str(pool, keys[key].name), pool_id2str(pool, key
 		{
 		  id = keys[i].name;
 		  if ((keys[i].type == REPOKEY_TYPE_IDARRAY || keys[i].type == REPOKEY_TYPE_REL_IDARRAY)
+		      && keys[i].storage != KEY_STORAGE_IDARRAYBLOCK
 		      && id >= INTERESTED_START && id <= INTERESTED_END)
 		    {
 		      size_idarray += keys[i].size;
