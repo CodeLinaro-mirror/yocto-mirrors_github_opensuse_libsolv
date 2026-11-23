@@ -417,6 +417,10 @@ pool_presize_idhashes(Pool *pool, unsigned int nstrings, unsigned int nrels)
     nstrings = MAX_IDHASH_PRESIZE;
   if (nrels > MAX_IDHASH_PRESIZE)
     nrels = MAX_IDHASH_PRESIZE;
+  if ((unsigned int)pool->ss.nstrings + nstrings >= (unsigned int)SOLV_MAX_INDEX)
+    nstrings = 0;
+  if ((unsigned int)pool->nrels + nrels >= (unsigned int)SOLV_MAX_INDEX)
+    nrels = 0;
   pool->presize_nstrings = pool->ss.nstrings + (int)nstrings;
   pool->presize_nrels = pool->nrels + (int)nrels;
   pool_shrink_strings(pool);
