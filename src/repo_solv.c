@@ -600,7 +600,7 @@ repo_integrate_rels_block(Repo *repo, unsigned char *blk, int *blklenp, int numi
 	      chunk = j;
 	      break;
 	    }
-	  if (rd[j].name >= numid + i + j || rd[j].evr >= numid + i + j)
+	  if ((unsigned int)rd[j].name >= (unsigned int)(numid + i + j) || (unsigned int)rd[j].evr >= (unsigned int)(numid + i + j))
 	    return -1;
 	  solv_prefetch(idmap + rd[j].name);
 	  solv_prefetch(idmap + rd[j].evr);
