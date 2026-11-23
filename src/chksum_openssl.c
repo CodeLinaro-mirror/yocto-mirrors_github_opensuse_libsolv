@@ -25,34 +25,32 @@ struct s_Chksum {
 static void *
 solv_chksum_impl(Chksum *chk, int op)
 {
-  if (op == SOLV_CHKSUMP_IMPL_CLONE) {
-    Chksum *clone = solv_memdup(chk, sizeof(*chk));
-    if (!(clone->context = EVP_MD_CTX_dup(chk->context))) {
-      solv_free(clone);
+  if (op == SOLV_CHKSUMP_IMPL_CLONE)
+    {
+      Chksum *clone = solv_memdup(chk, sizeof(*chk));
+      if (!(clone->context = EVP_MD_CTX_dup(chk->context)))
+	{
+	  solv_free(clone);
+	  return 0;
+        }
+      return clone;
+    }
+  else if (op == SOLV_CHKSUMP_IMPL_FINALIZE)
+    {
+      unsigned int chk_size;
+      chk->update_failed |= !EVP_DigestFinal_ex(chk->context, chk->result, &chk_size);
+      EVP_MD_CTX_free(chk->context);
+      chk->impl = 0;
+      return chk->update_failed ? 0 : chk->result + chk_size;
+    }
+  else if (op == SOLV_CHKSUMP_IMPL_FREE)
+    {
+      EVP_MD_CTX_free(chk->context);
+      chk->impl = 0;
       return 0;
     }
-    return clone;
-  }
-  else if (op == SOLV_CHKSUMP_IMPL_FINALIZE)
-  {
-    unsigned int chk_size;
-    chk->update_failed |= !EVP_DigestFinal_ex(chk->context, chk->result, &chk_size);
-    EVP_MD_CTX_free(chk->context);
-    chk->impl = 0;
-    if (chk->update_failed)
-      return 0;
-    else
-      return chk->result + chk_size;
-  }
-  else if (op == SOLV_CHKSUMP_IMPL_FREE)
-  {
-    EVP_MD_CTX_free(chk->context);
-    chk->impl = 0;
+  else
     return 0;
-  }
-  else {
-    return 0;
-  }
 }
 
 Chksum *
@@ -65,10 +63,11 @@ solv_chksum_create(Id type)
   chk->type = type;
   chk->impl = solv_chksum_impl;
 
-  if (!(chk->context = EVP_MD_CTX_new())) {
-    solv_free(chk);
-    return 0;
-  }
+  if (!(chk->context = EVP_MD_CTX_new()))
+    {
+      solv_free(chk);
+      return 0;
+    }
 
   switch(type)
     {
@@ -109,11 +108,7 @@ solv_chksum_add(Chksum *chk, const void *data, int len)
     return;
   if (!chk->impl)
     return;
-  if (len < 0 || len > SIZE_MAX) {
-    chk->update_failed = 1;
-    return;
-  }
-  if (!EVP_DigestUpdate(chk->context, data, (size_t)len))
+  if (len < 0 || len > SIZE_MAX || !EVP_DigestUpdate(chk->context, data, (size_t)len))
     chk->update_failed = 1;
 }
 
