@@ -277,6 +277,7 @@ stringpool_integrate(Stringpool *ss, int numid, Offset sizeid, Id *idmap)
   int i;
 
   stringpool_resize_hash(ss, numid);
+  idmap[0] = 0;
   for (i = 1; i < numid;)
     {
       int chunk = numid - i > INTEGRATE_SPOOL_CHUNK ? INTEGRATE_SPOOL_CHUNK : numid - i;
